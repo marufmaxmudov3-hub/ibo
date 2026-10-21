@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Belgi: kasallik aniqlovchi</title>
+<style>
+:root{
+  --bg:#eef1ff; --ink:#141a3d; --blue:#3a4dff; --c0:#cfd8ff; --c1:#ffa94d; --c2:#ff4d5e; --yel:#ffd84d; --muted:#666c96;
+  --sans:"Avenir Next","Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.45}
+.hidden{display:none!important}
+.shell{max-width:1140px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:32px;min-height:100vh}
+.left{display:flex;flex-direction:column;padding:8px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.logo i{width:34px;height:34px;border-radius:11px;background:var(--blue);position:relative}
+.logo i::before,.logo i::after{content:"";position:absolute;background:#fff;border-radius:2px;left:50%;top:50%;transform:translate(-50%,-50%)}
+.logo i::before{width:16px;height:4px}.logo i::after{width:4px;height:16px}
+.stage{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 0}
+
+/* sarlavha va matn */
+.big{font-size:clamp(40px,6vw,72px);line-height:.98;font-weight:900;letter-spacing:-.045em;margin:0 0 18px}
+.big em{font-style:normal;color:var(--blue)}
+.q{font-size:clamp(34px,5vw,56px);line-height:1;font-weight:900;letter-spacing:-.04em;margin:0 0 10px}
+.sub{font-size:18px;color:var(--muted);margin:0 0 26px;max-width:46ch}
+.hint{font-weight:700;color:var(--blue);margin:0 0 10px}
+.cta{font:inherit;font-weight:800;font-size:19px;background:var(--yel);color:var(--ink);border:0;border-radius:99px;padding:18px 34px;cursor:pointer;box-shadow:0 6px 0 #d9b21f;transition:transform .1s,box-shadow .1s;align-self:flex-start}
+.cta:hover{transform:translateY(2px);box-shadow:0 4px 0 #d9b21f}
+.cta:active{transform:translateY(6px);box-shadow:0 0 0 #d9b21f}
+.ghost{font:inherit;font-weight:700;font-size:15px;background:#fff;color:var(--ink);border:2px solid #d9defa;border-radius:99px;padding:10px 18px;cursor:pointer}
+.ghost:hover{border-color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* progress: issiqlik bo'laklari */
+.seg{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-bottom:26px}
+.seg span{height:10px;border-radius:99px;background:#dfe4ff;transition:background .3s}
+.seg .d0{background:var(--blue)} .seg .d1{background:var(--c1)} .seg .d2{background:var(--c2)}
+.seg .now{background:var(--ink)}
+
+/* javob plitkalari */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tile{font:inherit;text-align:left;cursor:pointer;border-radius:26px;border:3px solid;padding:18px 16px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .12s,background .15s,color .15s}
+.tile b{font-size:24px;font-weight:900;letter-spacing:-.02em}
+.tile small{font-size:13px;font-weight:700;opacity:.65}
+.tile .heat{display:flex;gap:4px;align-items:flex-end}
+.tile .heat i{width:10px;border-radius:4px;background:currentColor;opacity:.2}
+.tile .heat i.on{opacity:1}
+.t0{background:#fff;border-color:#d4dbff;color:#3a4dff}
+.t1{background:#fff5e8;border-color:#ffc88a;color:#c26a00}
+.t2{background:#ffe9ec;border-color:#ff9aa5;color:#d02840}
+.t0:hover,.t0.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.t1:hover,.t1.sel{background:var(--c1);border-color:var(--c1);color:var(--ink)}
+.t2:hover,.t2.sel{background:var(--c2);border-color:var(--c2);color:#fff}
+.tile:hover{transform:translateY(-4px)}
+.back{margin-top:22px;background:none;border:0;font:inherit;font-weight:700;color:var(--muted);cursor:pointer;padding:6px 0;align-self:flex-start}
+.back:hover{color:var(--ink)}
+.swap{animation:in .3s ease}
+@keyframes in{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+/* tana xaritasi */
+.scan{position:sticky;top:28px;height:calc(100vh - 56px);max-height:780px;border-radius:40px;overflow:hidden;
+  background:radial-gradient(circle,#2b3680 1.2px,transparent 1.6px) 0 0/20px 20px,radial-gradient(80% 60% at 50% 40%,#232d72,#141a3d);
+  display:flex;flex-direction:column;align-items:center;padding:22px 18px 16px}
+.scan svg{flex:1;min-height:0;width:100%}
+.legend{display:flex;gap:16px;color:#b8c0f5;font-size:13px;font-weight:700}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:var(--k)}
+.b{fill:var(--bf);stroke:#6f7dff;stroke-width:1.5;transition:fill .7s}
+.l{fill:none;stroke:var(--bf);stroke-linecap:round;transition:stroke .7s}
+.sp{fill:rgba(255,255,255,.06);stroke:rgba(255,255,255,.28);stroke-width:1.4;stroke-dasharray:3 3;transition:fill .4s,stroke .4s}
+.sp.v0{fill:rgba(111,125,255,.45);stroke:#8c98ff;stroke-dasharray:none}
+.sp.v1{fill:var(--c1);stroke:#ffe0b3;stroke-dasharray:none;filter:drop-shadow(0 0 7px var(--c1))}
+.sp.v2{fill:var(--c2);stroke:#ffc2c8;stroke-dasharray:none;filter:drop-shadow(0 0 9px var(--c2))}
+.sp.cur{stroke:#fff;stroke-width:2.5;stroke-dasharray:none;transform-box:fill-box;transform-origin:center;animation:ping 1.1s ease-in-out infinite}
+@keyframes ping{50%{transform:scale(1.35)}}
+.curfig .b{stroke:#fff;stroke-width:2.5}
+.shiv1{animation:sh 0.26s linear infinite}.shiv2{animation:sh .1s linear infinite}
+@keyframes sh{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+
+/* natija */
+.pct{font-size:clamp(84px,12vw,140px);font-weight:900;letter-spacing:-.06em;line-height:.85;color:var(--blue)}
+.pct span{font-size:.4em;letter-spacing:0}
+.rname{font-size:clamp(28px,3.6vw,40px);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin:10px 0 6px}
+.conf{color:var(--muted);margin:0 0 22px}
+.ticket{background:#fff;border-radius:28px;box-shadow:0 20px 44px rgba(20,26,61,.13);margin-bottom:8px}
+.tk-top{padding:22px 26px 18px}
+.tk-top small{color:var(--muted);font-weight:700}
+.dn{font-size:32px;font-weight:900;letter-spacing:-.03em;line-height:1.1;margin:2px 0 4px}
+.alt{color:var(--muted);font-size:15px}
+.tk-bot{position:relative;border-top:3px dashed #dfe4ff;padding:16px 26px 20px}
+.tk-bot::before,.tk-bot::after{content:"";position:absolute;top:-15px;width:27px;height:27px;border-radius:50%;background:var(--bg)}
+.tk-bot::before{left:-14px}.tk-bot::after{right:-14px}
+.badge{display:inline-block;border-radius:99px;padding:9px 16px;font-weight:800;font-size:15px}
+.badge.ok{background:#cdf5e0;color:#0d6b43}.badge.mid{background:#ffe2c2;color:#8a4a00}.badge.hi{background:var(--c2);color:#fff}
+h3{font-size:20px;font-weight:900;letter-spacing:-.02em;margin:28px 0 10px}
+.adv{list-style:none;margin:0;padding:0}
+.adv li{position:relative;padding:4px 0 4px 26px}
+.adv li::before{content:"";position:absolute;left:0;top:11px;width:12px;height:12px;border-radius:4px;background:var(--blue)}
+.row{margin:10px 0}.row .t{display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin-bottom:5px}
+.track{height:12px;border-radius:99px;background:#dfe4ff;overflow:hidden}.fill{height:100%;border-radius:99px;background:var(--blue)}
+.pills{display:flex;flex-wrap:wrap;gap:10px}
+.flag{cursor:pointer}.flag input{position:absolute;opacity:0;pointer-events:none}
+.flag span{display:inline-block;padding:9px 15px;border-radius:99px;background:#fff;border:2px solid #d9defa;font-weight:700;font-size:14.5px}
+.flag:has(input:checked) span{background:var(--c2);border-color:var(--c2);color:#fff}
+.flag:has(input:focus-visible) span{outline:3px solid var(--blue);outline-offset:2px}
+.alert{margin-top:14px;background:var(--c2);color:#fff;border-radius:18px;padding:14px 18px;font-weight:800}
+.sum{background:#fff;border-radius:22px;padding:18px 20px}
+.sum pre{margin:0 0 14px;white-space:pre-wrap;font:inherit;font-size:15px}
+.acts{display:flex;gap:10px;flex-wrap:wrap}
+.warn{margin-top:22px;font-size:13.5px;color:var(--muted)}
+
+.contact{background:#fff;border-radius:22px;padding:18px 20px;display:grid;gap:14px}
+.contact label{display:grid;gap:6px;font-weight:700;font-size:14px;color:var(--muted)}
+.contact input{font:inherit;font-size:18px;font-weight:700;color:var(--ink);border:2px solid #d9defa;border-radius:14px;padding:13px 14px;background:var(--bg);width:100%}
+.contact input:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(58,77,255,.2)}
+.sos{display:flex;align-items:center;justify-content:center;margin-top:16px;text-decoration:none;font-weight:900;font-size:20px;background:#fff;color:var(--c2);border:3px solid var(--c2);border-radius:99px;padding:16px 22px}
+.sos:hover{background:var(--c2);color:#fff}
+.sos.hot{background:var(--c2);color:#fff;animation:sosping 1.2s ease-in-out infinite}
+@keyframes sosping{50%{box-shadow:0 0 0 10px rgba(255,77,94,.25)}}
+.sos.mini{display:inline-flex;margin:0 0 0 10px;font-size:15px;padding:9px 16px;vertical-align:middle;background:var(--c2);color:#fff}
+.cta2{display:inline-block;text-decoration:none;font-weight:800;font-size:16px;background:var(--blue);color:#fff;border-radius:99px;padding:13px 22px}
+a.ghost{text-decoration:none;display:inline-block}
+[aria-disabled="true"]{opacity:.55}
+.ph{display:flex;align-items:center;border:2px solid #d9defa;border-radius:14px;background:var(--bg);overflow:hidden}
+.ph:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(58,77,255,.2)}
+.ph.need{border-color:var(--c2);box-shadow:0 0 0 3px rgba(255,77,94,.25)}
+.ph span{padding:0 2px 0 14px;font-size:18px;font-weight:800;color:var(--muted)}
+.contact .ph input{border:0;box-shadow:none;background:transparent;padding-left:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:14px 20px;border-radius:16px;font-weight:700;font-size:15px;max-width:min(92vw,460px);opacity:0;pointer-events:none;transition:.25s;z-index:50;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.note{font-size:13px;color:var(--muted);margin:0}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr;gap:18px;padding:18px 16px 40px}
+  .scan{position:relative;top:0;height:300px;order:-1;border-radius:30px}
+  .legend{font-size:12px}
+  .tile{min-height:118px;padding:14px 12px}.tile b{font-size:20px}
+}
+@media print{
+  body{background:#fff}.scan,.acts,.pills,.cta,.back,.logo,#again,.contact,.sos,.toast{display:none!important}
+  .shell{display:block}.ticket{box-shadow:none;border:2px solid #000}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="left">
+    <div class="logo"><i></i>Belgi</div>
+
+    <div class="stage swap" id="intro">
+      <h1 class="big">Tanangiz nima <em>deyapti?</em></h1>
+      <p class="sub">10 ta savolga javob bering. Tana xaritasi belgilaringizni ranglar bilan ko'rsatadi, dastur esa ehtimoliy kasallikni va qaysi shifokorga borishni aytadi.</p>
+      <button class="cta" id="start">Boshlash</button>
+    </div>
+
+    <div class="stage hidden" id="quiz">
+      <div class="seg" id="seg"></div>
+      <p class="hint" id="hint"></p>
+      <h2 class="q" id="qtext"></h2>
+      <p class="sub" id="sub"></p>
+      <div class="tiles" id="opts"></div>
+      <button class="back" id="back">Oldingi savol</button>
+    </div>
+
+    <div class="stage hidden" id="result"></div>
+  </section>
+
+  <aside class="scan" aria-label="Tana xaritasi">
+    <svg id="fig" viewBox="0 0 240 490" role="img" aria-label="Tana siluet">
+      <g id="body">
+        <circle class="b" cx="120" cy="52" r="34"/>
+        <rect class="b" x="107" y="82" width="26" height="30" rx="9"/>
+        <path class="b" d="M72 110C95 102 145 102 168 110C184 116 188 140 186 172L180 264C150 280 90 280 60 264L54 172C52 140 56 116 72 110Z"/>
+        <line class="l" x1="64" y1="132" x2="36" y2="250" stroke-width="26"/>
+        <line class="l" x1="176" y1="132" x2="204" y2="250" stroke-width="26"/>
+        <line class="l" x1="98" y1="270" x2="92" y2="462" stroke-width="36"/>
+        <line class="l" x1="142" y1="270" x2="148" y2="462" stroke-width="36"/>
+      </g>
+      <g id="sps"></g>
+    </svg>
+    <div class="legend"><span style="--k:#8c98ff">Yo'q</span><span style="--k:var(--c1)">Biroz</span><span style="--k:var(--c2)">Kuchli</span></div>
+  </aside>
+</main>
+
+<script>
+const Q = [
+  ["Burun oqishi", "Burun bitishi yoki suyuq ajralma bormi?"],
+  ["Isitma", "Harorat 37,5 °C dan yuqorimi?"],
+  ["Titroq", "Sovuq qotish yoki qaltirash bormi?"],
+  ["Ko'ngil aynishi", "Qusgisi kelish hissi bormi?"],
+  ["Yo'tal", "Quruq yoki balg'amli yo'tal bormi?"],
+  ["Tomoq og'rig'i", "Yutinganda tomoq og'riyaptimi?"],
+  ["Qusish yoki ich ketishi", "Qusish yoki suyuq ich ketishi bormi?"],
+  ["Mushak og'rig'i", "Badan, mushak yoki bo'g'imlar zirqirayaptimi?"],
+  ["Qorin og'rig'i", "Qorinda og'riq yoki qisqarish sezilyaptimi?"],
+  ["Hid va ta'm", "Hid yoki ta'mni sezmayapsizmi?"]
+];
+const LV = [["Yo'q",0],["Biroz",0.5],["Kuchli",1]];
+const NAMES = {0.5:"biroz",1:"kuchli"};
+const D = [
+ {name:"Shamollash (ORVI)", w:[3,1,1,0,2,2,0,1,0,0], key:[0,4,5], doc:"Terapevt", alt:"Oilaviy shifokor", lvl:0,
+  tips:["Iliq suyuqlikni ko'proq iching va dam oling.","Xonani tez-tez shamollating, havoni namlang.","Belgilar 7 kundan ortiq cho'zilsa, shifokorga boring."]},
+ {name:"Gripp", w:[1,3,3,1,2,1,0,3,0,0], key:[1,7], doc:"Terapevt", alt:"Infeksionist", lvl:1,
+  tips:["Yotoq rejimida dam oling va ko'p suyuqlik iching.","Haroratni kuniga ikki-uch marta o'lchab turing.","Boshqalarga yuqtirmaslik uchun niqob taqing."]},
+ {name:"Angina (tomoq yallig'lanishi)", w:[0,3,2,0,0,3,0,1,0,0], key:[5], n:[[0,1],[4,1]], doc:"LOR shifokori (otolaringolog)", alt:"Terapevt", lvl:1,
+  tips:["Isitma bilan kuchli tomoq og'rig'i bo'lsa, shifokor ko'rigi kerak.","Antibiotikni o'zingiz boshlamang: sababini shifokor aniqlaydi.","Iliq ichimliklar ichib, tomoqni yuvib turing."]},
+ {name:"Ichak infeksiyasi yoki zaharlanish", w:[0,2,1,3,0,0,3,1,3,0], key:[3,6,8], n:[[0,1],[4,1]], doc:"Infeksionist", alt:"Gastroenterolog", lvl:1,
+  tips:["Oz-ozdan, tez-tez suyuqlik iching (regidron kabi eritmalar).","Yog'li va og'ir ovqatlardan saqlaning.","Suvsizlik belgilari (og'iz qurishi, siydik kamayishi) bo'lsa, shifokorga boring."]},
+ {name:"COVID-19 ehtimoli", w:[2,2,1,1,2,2,0,2,0,3], key:[9,1,4], doc:"Infeksionist", alt:"Terapevt", lvl:1,
+  tips:["Boshqalardan ajralib turing va niqob taqing.","Imkon bo'lsa, COVID-19 testini topshiring.","Nafas qisilsa, darhol 103 ga qo'ng'iroq qiling."]},
+ {name:"Allergik rinit", w:[3,0,0,0,1,1,0,0,0,1], key:[0], n:[[1,3],[2,2],[7,1]], doc:"Allergolog", alt:"LOR shifokori", lvl:0,
+  tips:["Chang, gul changi va hayvon junidan uzoqroq turing.","Burunni sho'r eritma bilan yuvish yengillik berishi mumkin.","Sababini aniqlash uchun allergologga murojaat qiling."]}
+];
+const URG = [
+  {c:"ok",  t:"Rejalashtirilgan ko'rik: 3–5 kun ichida"},
+  {c:"mid", t:"Tezroq ko'rik: 1–2 kun ichida"},
+  {c:"hi",  t:"Shoshilinch: bugun shifokorga boring"}
+];
+const FLAGS = ["Nafas qisilishi","Ko'krak qafasida og'riq","Harorat 39 °C dan yuqori","Qusuq yoki najasda qon","Hushdan ketish yoki chalkashlik","Belgilar 3 kundan beri kuchayib boryapti"];
+
+/* Shifokorlar telefon raqamlari: kerakli raqamni shu yerga yozing, masalan "Terapevt":"+998711234567".
+   Bo'sh qoldirsangiz, foydalanuvchi raqamni natija sahifasida o'zi kiritadi. */
+const DOC_PHONES = {
+  "Terapevt":"",
+  "Oilaviy shifokor":"",
+  "Infeksionist":"",
+  "Gastroenterolog":"",
+  "Allergolog":"",
+  "LOR shifokori (otolaringolog)":""
+};
+function fmt(v){                      // faqat mahalliy 9 raqam: "90 123 45 67"
+  let d = (v||"").replace(/\D/g,"");
+  if(d.startsWith("998") && d.length > 9) d = d.slice(3);
+  d = d.slice(0,9);
+  let o = d.slice(0,2);
+  if(d.length > 2) o += " " + d.slice(2,5);
+  if(d.length > 5) o += " " + d.slice(5,7);
+  if(d.length > 7) o += " " + d.slice(7,9);
+  return o;
+}
+const loc = v => (v||"").replace(/\D/g,"");
+const valid = v => loc(v).length === 9;
+const full = v => "+998" + loc(v);
+
+/* tana nuqtalari: savol indeksi -> [x, y, r] */
+const SP = {0:[[120,54,7]],3:[[104,198,13]],4:[[96,150,18],[144,150,18]],5:[[120,98,10]],6:[[138,198,13]],
+            7:[[46,200,12],[194,200,12],[96,350,15],[144,350,15]],8:[[120,242,17]],9:[[120,70,6]]};
+const NS = "http://www.w3.org/2000/svg";
+Object.entries(SP).forEach(([q,list])=>list.forEach(([x,y,r])=>{
+  const c = document.createElementNS(NS,"circle");
+  c.setAttribute("class","sp"); c.setAttribute("cx",x); c.setAttribute("cy",y); c.setAttribute("r",r); c.dataset.q = q;
+  document.getElementById("sps").appendChild(c);
+}));
+
+function score(d, a){
+  let got = 0, tot = 0, pen = 0;
+  d.w.forEach((w,i)=>{ tot += w; got += w*a[i]; });
+  (d.n||[]).forEach(([i,w])=>{ pen += w*a[i]; });
+  let s = (got - pen*0.8) / tot;
+  if(d.key && !d.key.some(i=>a[i]>0)) s *= 0.4;
+  return Math.max(0, Math.min(1, s));
+}
+function urgency(d, a, flagged){
+  if(flagged) return 2;
+  let l = d.lvl;
+  if(a.reduce((x,y)=>x+y,0) >= 5) l++;
+  if(a[1] === 1 && (a[6] === 1 || a[2] === 1)) l++;
+  return Math.min(2, l);
+}
+
+const $ = id => document.getElementById(id);
+let i = 0, ans = [];
+
+function paint(cur){
+  const fig = $("fig");
+  document.querySelectorAll(".sp").forEach(c=>{
+    const q = +c.dataset.q, v = ans[q];
+    c.setAttribute("class","sp" + (v===undefined?"": v===1?" v2": v===0.5?" v1":" v0") + (q===cur?" cur":""));
+  });
+  fig.style.setProperty("--bf", ans[1]===1 ? "#c9303f" : ans[1]===0.5 ? "#b8622d" : "#2e3a8c");
+  fig.classList.toggle("curfig", cur===1 || cur===2);
+  $("body").setAttribute("class", ans[2]===1 ? "shiv2" : ans[2]===0.5 ? "shiv1" : "");
+}
+function seg(){
+  $("seg").innerHTML = Q.map((_,k)=>`<span class="${ans[k]!==undefined ? 'd'+(ans[k]===1?2:ans[k]===0.5?1:0) : k===i ? 'now' : ''}"></span>`).join("");
+}
+
+$("start").onclick = ()=>{ $("intro").classList.add("hidden"); $("quiz").classList.remove("hidden"); render(); };
+
+function render(){
+  const box = $("quiz");
+  box.classList.remove("swap"); void box.offsetWidth; box.classList.add("swap");
+  $("hint").textContent = `Savol ${i+1} / ${Q.length}`;
+  $("qtext").textContent = Q[i][0];
+  $("sub").textContent = Q[i][1];
+  $("back").style.visibility = i ? "visible" : "hidden";
+  $("opts").innerHTML = LV.map(([label,v],n)=>
+    `<button class="tile t${n} ${ans[i]===v?'sel':''}" data-v="${v}">
+      <span class="heat">${[0,1,2].map(b=>`<i class="${b < [0,2,3][n] ? 'on':''}" style="height:${12+b*9}px"></i>`).join("")}</span>
+      <span><b>${label}</b><br><small>${n+1}-tugma</small></span>
+    </button>`).join("");
+  seg(); paint(i);
+}
+$("opts").addEventListener("click", e=>{ const b = e.target.closest(".tile"); if(b) choose(+b.dataset.v); });
+function choose(v){ ans[i] = v; i++; i < Q.length ? render() : finish(); }
+function back(){ if(i>0){ i--; render(); } }
+$("back").onclick = back;
+document.addEventListener("keydown", e=>{
+  if($("quiz").classList.contains("hidden")) return;
+  if(["1","2","3"].includes(e.key)) choose(LV[+e.key-1][1]);
+  else if(e.key==="Backspace"||e.key==="ArrowLeft") back();
+});
+
+function finish(){
+  paint(-1);
+  $("quiz").classList.add("hidden");
+  const R = $("result"); R.classList.remove("hidden"); R.classList.remove("swap"); void R.offsetWidth; R.classList.add("swap");
+
+  const total = ans.reduce((a,b)=>a+b,0);
+  const rank = D.map(d=>({d, s:score(d,ans)})).sort((a,b)=>b.s-a.s);
+  const top = rank[0], sec = rank[1];
+  const found = total > 0 && top.s >= 0.25;
+  let html = "";
+
+  if(total === 0){
+    html += `<h2 class="q">Belgi tanlanmadi</h2><p class="sub">Ehtimol, sog'siz. Ahvolingiz yomonlashsa, testni qayta o'tkazing.</p>`;
+  } else if(!found){
+    html += `<h2 class="q">Aniq naqsh topilmadi</h2><p class="sub">Belgilaringiz kuchsiz yoki bir-biriga mos emas. 2–3 kun kuzating, yomonlashsa terapevtga boring.</p>`;
+  } else {
+    const gap = top.s - sec.s, pct = Math.round(top.s*100);
+    const conf = top.s>=0.6 && gap>=0.12 ? "Belgilar bu kasallikka yaxshi mos keladi."
+               : top.s>=0.4 ? "Belgilar bu kasallikka o'rtacha mos keladi."
+               : "Mos kelish past: aniqlik uchun shifokor kerak.";
+    const close = gap<0.08 && sec.s>=0.25 ? ` ${sec.d.name} ham mumkin.` : "";
+    html += `<div class="pct">${pct}<span>%</span></div>
+      <h2 class="rname">${top.d.name}</h2><p class="conf">${conf}${close}</p>
+      <div class="ticket">
+        <div class="tk-top"><small>Qaysi shifokorga borish kerak</small><div class="dn" id="dn"></div><div class="alt" id="alt"></div></div>
+        <div class="tk-bot"><span class="badge" id="badge"></span><a class="sos mini hidden" id="sos2" href="tel:103">103 ga qo'ng'iroq</a></div>
+      </div>`;
+    const others = rank.slice(1).filter(r=>r.s>=0.15).slice(0,3);
+    if(others.length){
+      html += `<h3>Boshqa ehtimollar</h3>` + others.map(r=>
+        `<div class="row"><div class="t"><span>${r.d.name}</span><span>${Math.round(r.s*100)}%</span></div>
+         <div class="track"><div class="fill" style="width:${Math.round(r.s*100)}%"></div></div></div>`).join("");
+    }
+    html += `<h3>Shifokor ko'rigigacha</h3><ul class="adv">${top.d.tips.map(t=>`<li>${t}</li>`).join("")}</ul>
+      <h3>Bog'lanish</h3>
+      <div class="contact">
+        <label>Ismingiz<input id="pname" autocomplete="name" placeholder="Ism familiya"></label>
+        <label>Sizning telefon raqamingiz<div class="ph"><span>+998</span><input id="pphone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="90 123 45 67"></div></label>
+        <label>Shifokor telefon raqami<div class="ph" id="dph"><span>+998</span><input id="dphone" type="tel" inputmode="numeric" placeholder="71 123 45 67" value="${fmt(DOC_PHONES[top.d.doc])}"></div></label>
+        <div class="acts"><a class="cta2" id="call" href="#" aria-disabled="true">Shifokorga qo'ng'iroq</a><a class="ghost" id="sms" href="#" aria-disabled="true">Xulosani SMS qilish</a></div>
+        <p class="note">Shifokor raqamini kiriting (9 ta raqam), shunda qo'ng'iroq va SMS tugmalari ishlaydi. Raqamlar faqat shu sahifada qoladi.</p>
+      </div>
+      <h3>Shifokorga ko'rsatish uchun xulosa</h3>
+      <div class="sum"><pre id="sumtxt"></pre>
+        <div class="acts"><button class="ghost" id="copy">Nusxa olish</button><button class="ghost" id="print">Chop etish</button></div></div>`;
+  }
+
+  html += `<h3>Quyidagilardan biri bormi?</h3><div class="pills">` +
+    FLAGS.map((f,n)=>`<label class="flag"><input type="checkbox" data-f="${n}"><span>${f}</span></label>`).join("") +
+    `</div><div id="alert"></div>
+    <a class="sos" id="sos" href="tel:103">103 ga qo'ng'iroq qilish (Tez yordam)</a>
+    <p class="warn">Bu dastur tashxis qo'ymaydi, faqat belgilarga qarab yo'nalish beradi. Yakuniy tashxisni faqat shifokor qo'yadi.</p>
+    <div class="acts" style="margin-top:20px"><button class="cta" id="again">Qayta tekshirish</button></div>`;
+  R.innerHTML = html;
+
+  function update(){
+    const flagged = [...R.querySelectorAll(".flag input:checked")].map(c=>FLAGS[+c.dataset.f]);
+    $("alert").innerHTML = flagged.length
+      ? `<div class="alert">Bu belgilar xavfli bo'lishi mumkin. Shifokorga zudlik bilan murojaat qiling yoki <a href="tel:103" style="color:#fff;text-decoration:underline">103 ga qo'ng'iroq qiling</a>.</div>` : "";
+    $("sos").classList.toggle("hot", flagged.length>0);
+    if(!found) return;
+    const u = URG[urgency(top.d, ans, flagged.length>0)];
+    $("dn").textContent = flagged.length ? "Tez yordam (103)" : top.d.doc;
+    $("alt").textContent = flagged.length ? `Keyin: ${top.d.doc}` : `Muqobil: ${top.d.alt}`;
+    $("badge").className = "badge " + u.c;
+    $("badge").textContent = u.t;
+    $("sos2").classList.toggle("hidden", u.c !== "hi");
+    const sym = ans.map((v,k)=>v>0 ? `${Q[k][0]} (${NAMES[v]})` : null).filter(Boolean).join(", ");
+    let st =
+`Sana: ${new Date().toLocaleDateString("en-GB")}
+Shikoyatlar: ${sym}
+Dastur xulosasi: ${top.d.name}, mos kelish ${Math.round(top.s*100)}%
+Tavsiya etilgan mutaxassis: ${top.d.doc}
+Shoshilinchlik: ${u.t}
+Xavfli belgilar: ${flagged.length ? flagged.join(", ") : "yo'q"}
+(Bu dastur xulosasi, tashxis emas.)`;
+    const pn = $("pname").value.trim(), pp = $("pphone").value, dp = $("dphone").value;
+    st = st.replace(/^Sana:.*\n/, m => m + (pn ? `Bemor: ${pn}\n` : "") + (valid(pp) ? `Bemor telefoni: ${full(pp)}\n` : "") + (valid(dp) ? `Shifokor telefoni: ${full(dp)}\n` : ""));
+    $("sumtxt").textContent = st;
+    const ok = valid(dp);
+    $("call").setAttribute("aria-disabled", ok ? "false" : "true");
+    $("sms").setAttribute("aria-disabled", ok ? "false" : "true");
+    $("call").href = ok ? "tel:" + full(dp) : "#";
+    $("sms").href = ok ? "sms:" + full(dp) + "?&body=" + encodeURIComponent(st) : "#";
+  }
+  R.querySelectorAll(".flag input").forEach(c=>c.onchange=update);
+  ["pname","pphone","dphone"].forEach(id=>{
+    const el = $(id); if(!el) return;
+    el.oninput = ()=>{ if(id !== "pname") el.value = fmt(el.value); if(id === "dphone") $("dph").classList.remove("need"); update(); };
+  });
+  update();
+
+  if($("copy")){
+    $("copy").onclick = async ()=>{
+      const t = $("sumtxt").textContent;
+      try{ await navigator.clipboard.writeText(t); }
+      catch(_){ const a=document.createElement("textarea"); a.value=t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); }
+      $("copy").textContent = "Nusxa olindi";
+      setTimeout(()=>$("copy").textContent="Nusxa olish", 1800);
+    };
+    $("print").onclick = ()=>window.print();
+  }
+  $("again").onclick = ()=>{
+    i = 0; ans = [];
+    R.classList.add("hidden");
+    $("quiz").classList.remove("hidden");
+    render();
+  };
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ---- xabar va qo'ng'iroq/SMS tugmalari ---- */
+const toastEl = document.createElement("div");
+toastEl.className = "toast"; toastEl.setAttribute("role","status");
+document.body.appendChild(toastEl);
+let tt;
+function toast(msg){
+  toastEl.textContent = msg; toastEl.classList.add("show");
+  clearTimeout(tt); tt = setTimeout(()=>toastEl.classList.remove("show"), 6000);
+}
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); }
+  catch(_){ const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); try{ document.execCommand("copy"); }catch(__){} a.remove(); }
+}
+document.addEventListener("click", e=>{
+  const a = e.target.closest('a[href^="tel:"], a[href^="sms:"], a[aria-disabled]');
+  if(!a) return;
+  if(a.getAttribute("aria-disabled") === "true"){
+    e.preventDefault();
+    const dp = $("dphone");
+    if(dp){ $("dph").classList.add("need"); dp.focus(); }
+    toast("Avval shifokorning telefon raqamini to'liq kiriting (9 ta raqam).");
+    return;
+  }
+  const num = a.getAttribute("href").replace(/^(tel|sms):/,"").split("?")[0];
+  setTimeout(()=>{
+    if(document.hasFocus() && !document.hidden){
+      copyText(num);
+      toast("Bu qurilma qo'ng'iroq ilovasini ochmadi. Raqam nusxalandi: " + num + ". Uni telefon ilovasiga qo'ying.");
+    }
+  }, 1200);
+});
+paint(-1);
+</script>
+</body>
+</html>
